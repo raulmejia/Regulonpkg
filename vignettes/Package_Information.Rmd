@@ -1,10 +1,10 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+title: "regulonDB"
+author: "Joselyn Chavez, Idalia Rojas, Israel Aguilar, Raul Mejia"
+date: "August 2018"
+output: BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{regulonDB}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,50 +16,61 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+regulonDB package takes an RSQLite object imported previously from an SQLite database file to R.
+    
+- Shows datasets available in the database and the fields of the data. 
+- Filter specific fields and search for rows that match with specific characteristics.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+## Libraries needed
 
-## Vignette Info
+- RSQLite
+- DBI
+- dplyr
+- dbplyr
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+## Import an SQLite dataset
 
-## Styles
+This step sholud be executed by the user before use the functions of regulonDB package. An example to load to R the SQLite object is:
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```
+  path_sqlite3 <- file.choose()
+  regulon <- DBI::dbConnect(RSQLite::SQLite(), path_sqlite3)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+## listDatasets
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+Prints all marts contained in the SQL object
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```
+  listDatasets(regulon)
 ```
 
-Also a quote using `>`:
+## listAttributes 
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+Prints a list of the columns of the mart
+
+```
+  listAttributes(regulon, "TF")
+```
+
+## getAttr
+
+Allows users to filter and retrieve data from a particular mart from SQLite database.
+
+```
+  getAttr(
+    database = regulon,
+    mart = "GENE",
+    filters = c("operon_id", "operon_name"),
+    value = c("ECK125235983","cmoM-mukFEB" ),
+    cond = "and")
+```
+
+## GetRegulatedGenesByTF
+
+Shows all the genes regulated by a Transcription Factor indicated by the user
+
+```
+  GetRegulatedGenesByTF(regulon, "Ara")
+```
+
